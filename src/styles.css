@@ -179,11 +179,16 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--blue); bord
 .trades { border: 0; padding: 0; margin: 18px 0 4px; }
 .trades legend { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 9px; padding: 0; }
 .full-label { margin: 14px 0 18px; }
-.draft-note { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 12px; padding: 16px; margin-top: 16px; }
-.draft-note strong { display: flex; align-items: center; gap: 8px; color: #92400e; font-size: 14.5px; }
-.draft-note p { color: #78350f; font-size: 14px; margin: 7px 0 13px; }
-.draft-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.draft-actions .btn { padding: 11px 16px; font-size: 14px; }
+.submit-note { border: 1.5px solid; border-radius: 12px; padding: 16px; margin-top: 16px; }
+.submit-note strong { display: flex; align-items: center; gap: 8px; font-size: 14.5px; line-height: 1.45; }
+.submit-note p { font-size: 14px; margin: 7px 0 0; line-height: 1.55; }
+.submit-note.ok { background: #f0fdf4; border-color: #86efac; }
+.submit-note.ok strong { color: #166534; }
+.submit-note.ok p { color: #14532d; }
+.submit-note.err { background: #fef2f2; border-color: #fca5a5; }
+.submit-note.err strong { color: #991b1b; }
+.note-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 13px; }
+.note-actions .btn { padding: 11px 16px; font-size: 14px; }
 
 /* ---------- coverage ---------- */
 .zone-h { display: flex; align-items: center; gap: 9px; font-size: 18px; margin: 26px 0 15px; }

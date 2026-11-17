@@ -1,5 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Logo, I } from './icons'
+import {
+  buildApplicationPayload, submitApplication, validateApplication,
+  type ApplicationForm, type Attribution,
+} from './submit'
 import {
   PHONE, EMAIL, SERVICE_OS, APPLIANCES, CORE_CITIES, RECRUITING_CITIES,
   EXPANSION_ZONES, REQUIREMENTS, STANDARDS, DEMO_JOBS, DEMO_PROVIDERS, FAQS,
@@ -17,17 +21,17 @@ const NAV: { id: Screen; label: string }[] = [
   { id: 'standards', label: 'Standards & FAQ' },
 ]
 
-const DRAFT_KEY = 'than-application-draft'
-
-function useUtmDraft() {
+/** First-touch landing attribution (UTM + ad-platform click IDs),
+ *  passed through to Service OS with the application. */
+function useAttribution(): Attribution {
   return useMemo(() => {
     const p = new URLSearchParams(window.location.search)
-    const utm: Record<string, string> = {}
-    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid']) {
+    const attribution: Attribution = {}
+    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'gclid', 'fbclid', 'msclkid'] as const) {
       const v = p.get(k)
-      if (v) utm[k] = v
+      if (v) attribution[k] = v
     }
-    return utm
+    return attribution
   }, [])
 }
 
@@ -84,13 +88,16 @@ export default function App() {
             <a href={SERVICE_OS} target="_blank" rel="noreferrer">Top Speed Service OS ↗</a>
             <a href="https://appliance-connect.vercel.app" target="_blank" rel="noreferrer">Appliance Connect (customers) ↗</a>
             <a href="https://gateway-express-one.vercel.app" target="_blank" rel="noreferrer">Gateway Express ↗</a>
-            <p className="foot-note">Customer looking for a repair? The Total Home Appliance Repair company site and Appliance Connect are the customer doors — this network is the provider side.</p>
+            <a href={`${SERVICE_OS}/book`} target="_blank" rel="noreferrer">Book a repair ↗</a>
+            <a href={`${SERVICE_OS}/speedy`} target="_blank" rel="noreferrer">Talk to Speedy ↗</a>
+            <a href={`${SERVICE_OS}/track`} target="_blank" rel="noreferrer">Track a job ↗</a>
+            <p className="foot-note">Customer looking for a repair? Book it, track it, or ask Speedy — the real AI assistant — in Top Speed Service OS. This network is the provider side.</p>
           </div>
           <div>
             <h4>Talk to the network team</h4>
             <a href={`tel:${PHONE.replace(/-/g, '')}`}>Call / text {PHONE}</a>
             <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-            <p className="foot-note">Applications are completed by email or phone with the network team — this site's form saves a local draft only.</p>
+            <p className="foot-note">Applications submit through this site straight into Top Speed Service OS — the network team reviews every one by hand. Prefer to talk first? Call or email.</p>
           </div>
         </div>
         <p className="disclaimer">Total Home Appliance Network is a working prototype. Portal and HQ figures are demo data. Rates and payment terms for providers are set in the signed provider agreement — nothing on this site quotes them. Dispatch is coordinated by human Service Setters through Top Speed Service OS.</p>
@@ -130,7 +137,7 @@ function Home({ go }: { go: (s: Screen) => void }) {
         <h2 className="center">From application to paid work</h2>
         <div className="steps">
           {[
-            { n: '1', t: 'Apply', d: 'Tell us who you are, where you’re based, and what you fix. The application is finished with the network team by email or phone.', icon: I.clipboard },
+            { n: '1', t: 'Apply', d: 'Tell us who you are, where you’re based, and what you fix — the application lands with the network team in Service OS, and they call you to verify.', icon: I.clipboard },
             { n: '2', t: 'Verify', d: 'Insurance documented, background check completed, experience confirmed. Verification is what lets customers trust a stranger at the door — including you.', icon: I.shield },
             { n: '3', t: 'Get dispatched', d: 'Setters confirm every job with the customer first, then dispatch through Service OS to the provider whose zone and trades match.', icon: I.dispatch },
             { n: '4', t: 'Complete & get paid', d: 'Run the job, document it with photos, invoice through the platform. Rates and payment terms are set in your signed provider agreement.', icon: I.money },
@@ -192,28 +199,40 @@ function Home({ go }: { go: (s: Screen) => void }) {
 
 /* ---------------- JOIN / APPLY ---------------- */
 
+type JoinStatus =
+  | { kind: 'idle' }
+  | { kind: 'sending' }
+  | { kind: 'success'; reference: string }
+  | { kind: 'error'; message: string }
+
 function Join() {
-  const utm = useUtmDraft()
-  const [form, setForm] = useState({
+  const attribution = useAttribution()
+  const [form, setForm] = useState<ApplicationForm>({
     name: '', company: '', phone: '', email: '', city: 'Coral Springs',
     trades: [] as string[], years: '', insurance: '', message: '',
   })
-  const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(DRAFT_KEY)
-      if (raw) setForm({ ...JSON.parse(raw).form })
-    } catch { /* fresh form */ }
-  }, [])
+  const [status, setStatus] = useState<JoinStatus>({ kind: 'idle' })
 
   const toggleTrade = (t: string) =>
     setForm(f => ({ ...f, trades: f.trades.includes(t) ? f.trades.filter(x => x !== t) : [...f.trades, t] }))
 
-  const saveDraft = () => {
-    const draft = { form, utm, savedAt: new Date().toISOString(), note: 'LOCAL DRAFT ONLY — not submitted to the network' }
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
-    setSaved(true)
+  const submit = async () => {
+    const problem = validateApplication(form)
+    if (problem) {
+      setStatus({ kind: 'error', message: problem })
+      return
+    }
+    setStatus({ kind: 'sending' })
+    try {
+      const page = window.location.href.split('#')[0]
+      const { reference } = await submitApplication(buildApplicationPayload(form, attribution, page))
+      setStatus({ kind: 'success', reference })
+    } catch {
+      setStatus({
+        kind: 'error',
+        message: 'That didn’t send — nothing was submitted. Check your connection and try again, or apply by phone or email instead:',
+      })
+    }
   }
 
   const mailto = `mailto:${EMAIL}?subject=${encodeURIComponent('Provider application — Total Home Appliance Network')}&body=${encodeURIComponent(
@@ -225,13 +244,13 @@ function Join() {
       <p className="eyebrow">JOIN THE NETWORK</p>
       <h1>Apply as a provider</h1>
       <p className="sub wide">
-        Independent techs and small repair companies take dispatched work through the network. Start your
-        application here, then finish it with the network team — verification is part of the deal, and it's
-        what makes the work steady.
+        Independent techs and small repair companies take dispatched work through the network. Apply here —
+        your application goes straight to the network team in Top Speed Service OS. Verification is part of
+        the deal, and it's what makes the work steady.
       </p>
 
       <div className="two-col form-layout">
-        <form className="form-card" onSubmit={e => { e.preventDefault(); saveDraft() }}>
+        <form className="form-card" onSubmit={e => { e.preventDefault(); void submit() }}>
           <h3>Application details</h3>
           <div className="form-grid">
             <label>Your name<input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Full name" /></label>
@@ -265,18 +284,25 @@ function Join() {
           </fieldset>
           <label className="full-label">Anything we should know<textarea rows={3} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Crew size, specialties, languages, second-truck plans…" /></label>
 
-          <button className="btn primary full" type="submit">Save application draft</button>
-          {saved && (
-            <div className="draft-note">
-              <strong><I.alert size={17} /> LOCAL DRAFT ONLY — not submitted.</strong>
-              <p>Your draft is saved in this browser only. To actually apply, send it to the network team:</p>
-              <div className="draft-actions">
-                <a className="btn primary" href={mailto}>Email it to {EMAIL}</a>
-                <a className="btn ghost" href={`tel:${PHONE.replace(/-/g, '')}`}>Call / text {PHONE}</a>
+          <button className="btn primary full" type="submit" disabled={status.kind === 'sending'}>
+            {status.kind === 'sending' ? 'Sending…' : 'Submit application'}
+          </button>
+          {status.kind === 'success' && (
+            <div className="submit-note ok">
+              <strong><I.check size={17} /> Application received — Ref {status.reference}</strong>
+              <p>The network team reviews every application by hand and will call <strong>{form.phone}</strong> to verify your trade, credentials and coverage areas before activation.</p>
+            </div>
+          )}
+          {status.kind === 'error' && (
+            <div className="submit-note err">
+              <strong><I.alert size={17} /> {status.message}</strong>
+              <div className="note-actions">
+                <a className="btn primary" href={`tel:${PHONE.replace(/-/g, '')}`}>Call / text {PHONE}</a>
+                <a className="btn ghost" href={mailto}>Email it to {EMAIL}</a>
               </div>
             </div>
           )}
-          <p className="fineprint">Nothing is transmitted by this form. The draft never leaves your device until you email or call it in.</p>
+          <p className="fineprint">Submitting sends your application to the network team through Top Speed Service OS. A human reviews every application and calls to verify before activation — submitting never activates an account on its own.</p>
         </form>
 
         <aside className="req-card sticky">
