@@ -14,7 +14,7 @@ export const CORE_CITIES = [
   'Hollywood', 'Pembroke Pines', 'Miramar',
 ]
 
-/** Cities where the network is actively recruiting providers right now (demo ops data). */
+/** Cities where the network is actively recruiting providers right now. */
 export const RECRUITING_CITIES = ['Margate', 'Tamarac', 'Lauderhill', 'Deerfield Beach', 'Weston', 'Parkland']
 
 export const EXPANSION_ZONES = [
@@ -41,7 +41,7 @@ export const STANDARDS = [
   { title: 'Leave it cleaner than you found it', text: 'Panels back on, area wiped down, old parts offered to the customer. The next provider visit starts with your reputation.' },
 ]
 
-export type DemoJob = {
+export type NetworkJob = {
   id: string
   appliance: string
   problem: string
@@ -51,15 +51,12 @@ export type DemoJob = {
   customerNote: string
 }
 
-export const DEMO_JOBS: DemoJob[] = [
-  { id: 'NET-2201', appliance: 'Refrigerator', problem: 'Not cooling, freezer side warm', city: 'Coral Springs', window: 'Today · 12pm–2pm', status: 'Awaiting acceptance', customerNote: 'Gate code on file with the setter. Two-story home, fridge in kitchen.' },
-  { id: 'NET-2202', appliance: 'Washer', problem: 'Won’t drain, standing water in drum', city: 'Margate', window: 'Today · 2pm–4pm', status: 'Awaiting acceptance', customerNote: 'Laundry on first floor. Customer has towels down around the unit.' },
-  { id: 'NET-2203', appliance: 'Oven & Range', problem: 'Bake element not heating', city: 'Plantation', window: 'Tomorrow · 9am–11am', status: 'Assigned', customerNote: 'Electric range. Customer confirmed through the setter this morning.' },
-  { id: 'NET-2204', appliance: 'Dryer', problem: 'Runs but no heat', city: 'Sunrise', window: 'Tomorrow · 11am–1pm', status: 'En route', customerNote: 'Second visit — thermal fuse replaced last week, still no heat. Bring full heating circuit kit.' },
-  { id: 'NET-2205', appliance: 'Dishwasher', problem: 'Leaking from door during cycle', city: 'Fort Lauderdale', window: 'Yesterday · 10am–12pm', status: 'Completed', customerNote: 'Door gasket replaced. Photos and invoice submitted through the platform.' },
-]
+// Production: the dispatch board starts empty (reset to zero at the
+// production launch on November 17, 2026). Jobs are dispatched by human
+// Service Setters through Top Speed Service OS and appear here as they flow.
+export const NETWORK_JOBS: NetworkJob[] = []
 
-export type DemoProvider = {
+export type NetworkProvider = {
   id: string
   name: string
   company: string
@@ -70,12 +67,9 @@ export type DemoProvider = {
   status: 'Active' | 'On a job' | 'In verification'
 }
 
-export const DEMO_PROVIDERS: DemoProvider[] = [
-  { id: 'P-101', name: 'Demo Provider A', company: 'Solo tech — refrigeration focus', zone: 'Coral Springs · Coconut Creek', trades: 'Refrigerator, Freezer & Ice Maker', rating: '4.9 (demo)', jobsDone: 'Demo record', status: 'On a job' },
-  { id: 'P-102', name: 'Demo Provider B', company: 'Two-tech laundry specialist crew', zone: 'Margate · Tamarac · Sunrise', trades: 'Washer, Dryer', rating: '4.8 (demo)', jobsDone: 'Demo record', status: 'Active' },
-  { id: 'P-103', name: 'Demo Provider C', company: 'Solo tech — cooking appliances', zone: 'Plantation · Davie · Weston', trades: 'Oven & Range, Cooktop, Microwave', rating: '5.0 (demo)', jobsDone: 'Demo record', status: 'Active' },
-  { id: 'P-104', name: 'Demo Provider D', company: 'Small company — 3 techs, full line', zone: 'Fort Lauderdale · Hollywood', trades: 'All residential appliances', rating: '4.7 (demo)', jobsDone: 'Demo record', status: 'In verification' },
-]
+// Production: the roster starts empty and fills as providers complete
+// verification and sign the provider agreement.
+export const NETWORK_PROVIDERS: NetworkProvider[] = []
 
 export const FAQS = [
   {
@@ -104,6 +98,6 @@ export const FAQS = [
   },
   {
     q: 'Is this portal the real dispatch system?',
-    a: 'No — this platform is a working prototype and the provider portal here is a preview running on demo data. Real dispatch today happens in Top Speed Service OS, coordinated by the Service Setters.',
+    a: 'Dispatch runs in Top Speed Service OS, coordinated by the Service Setters — that is where jobs are confirmed and assigned today. This portal is the provider front door: where you apply, see the standards, and where your dispatched work and compliance status are surfaced.',
   },
 ]

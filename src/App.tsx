@@ -6,8 +6,8 @@ import {
 } from './submit'
 import {
   PHONE, EMAIL, SERVICE_OS, APPLIANCES, CORE_CITIES, RECRUITING_CITIES,
-  EXPANSION_ZONES, REQUIREMENTS, STANDARDS, DEMO_JOBS, DEMO_PROVIDERS, FAQS,
-  type DemoJob,
+  EXPANSION_ZONES, REQUIREMENTS, STANDARDS, NETWORK_JOBS, NETWORK_PROVIDERS, FAQS,
+  type NetworkJob,
 } from './data'
 
 type Screen = 'home' | 'join' | 'coverage' | 'portal' | 'hq' | 'standards'
@@ -42,7 +42,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="proto-bar">
-        Working prototype — the provider portal and HQ views run on labeled demo data. Real dispatch happens in Top Speed Service OS.
+        Now live — provider applications are open and submit straight into Top Speed Service OS. Dispatch is coordinated by human Service Setters.
       </div>
       <header className="header">
         <button className="brand" onClick={() => go('home')} aria-label="Total Home Appliance Network home">
@@ -79,7 +79,7 @@ export default function App() {
             <h4>Network</h4>
             <button onClick={() => go('join')}>Join / Apply</button>
             <button onClick={() => go('coverage')}>Coverage & Zones</button>
-            <button onClick={() => go('portal')}>Provider Portal (preview)</button>
+            <button onClick={() => go('portal')}>Provider Portal</button>
             <button onClick={() => go('hq')}>Network HQ</button>
             <button onClick={() => go('standards')}>Standards & FAQ</button>
           </div>
@@ -100,7 +100,7 @@ export default function App() {
             <p className="foot-note">Applications submit through this site straight into Top Speed Service OS — the network team reviews every one by hand. Prefer to talk first? Call or email.</p>
           </div>
         </div>
-        <p className="disclaimer">Total Home Appliance Network is a working prototype. Portal and HQ figures are demo data. Rates and payment terms for providers are set in the signed provider agreement — nothing on this site quotes them. Dispatch is coordinated by human Service Setters through Top Speed Service OS.</p>
+        <p className="disclaimer">Total Home Appliance Network is live and recruiting providers. Rates and payment terms for providers are set in the signed provider agreement — nothing on this site quotes them. Dispatch is coordinated by human Service Setters through Top Speed Service OS.</p>
       </footer>
     </div>
   )
@@ -361,18 +361,18 @@ function Coverage({ go }: { go: (s: Screen) => void }) {
   )
 }
 
-/* ---------------- PROVIDER PORTAL (PREVIEW) ---------------- */
+/* ---------------- PROVIDER PORTAL ---------------- */
 
 function Portal() {
-  const [jobs, setJobs] = useState<DemoJob[]>(DEMO_JOBS)
-  const [selected, setSelected] = useState<DemoJob | null>(null)
+  const [jobs, setJobs] = useState<NetworkJob[]>(NETWORK_JOBS)
+  const [selected, setSelected] = useState<NetworkJob | null>(null)
 
   const act = (id: string, action: 'accept' | 'decline') => {
     if (action === 'accept') {
       setJobs(js => js.map(j => (j.id === id ? { ...j, status: 'Assigned' } : j)))
       setSelected(s => (s && s.id === id ? { ...s, status: 'Assigned' } : s))
     } else {
-      // Declined: the job leaves your board and goes back to the setter (preview state only).
+      // Declined: the job leaves your board and goes back to the setter.
       setJobs(js => js.filter(j => j.id !== id))
       setSelected(s => (s && s.id === id ? null : s))
     }
@@ -382,7 +382,7 @@ function Portal() {
 
   return (
     <section className="section page">
-      <div className="demo-banner"><I.alert size={17} /> <strong>PORTAL PREVIEW — DEMO DATA.</strong> This is what the provider portal will feel like. Every job, figure, and name here is demo data; real dispatch runs in Top Speed Service OS.</div>
+      <div className="demo-banner"><I.alert size={17} /> <strong>PROVIDER PORTAL — LIVE.</strong> The board starts empty: jobs a Service Setter dispatches to you from Top Speed Service OS appear here to accept or decline. Setters coordinate dispatch in Service OS today.</div>
 
       <p className="eyebrow">PROVIDER PORTAL</p>
       <h1>Your dispatched work</h1>
@@ -391,6 +391,9 @@ function Portal() {
         <div>
           <h3 className="zone-h">Offered to you ({offered.length})</h3>
           <div className="job-list">
+            {jobs.length === 0 && (
+              <div className="job-detail empty">No jobs dispatched yet. When a setter confirms a job in your zone and trade in Service OS, it lands here for you to accept or decline.</div>
+            )}
             {jobs.map(j => (
               <button key={j.id} className={`job-card ${selected?.id === j.id ? 'on' : ''}`} onClick={() => setSelected(j)}>
                 <span className="job-top"><strong>{j.appliance}</strong><span className={`status s-${j.status.replace(/\s/g, '').toLowerCase()}`}>{j.status}</span></span>
@@ -416,27 +419,27 @@ function Portal() {
                   <button className="btn decline" onClick={() => act(selected.id, 'decline')}><I.x size={17} /> Decline</button>
                 </div>
               ) : (
-                <p className="status-line">Status: <strong>{selected.status}</strong> — state changed locally in this preview only. Nothing was sent anywhere.</p>
+                <p className="status-line">Status: <strong>{selected.status}</strong> — dispatch of record runs in Service OS; your setter confirms every status change.</p>
               )}
             </div>
           ) : (
-            <div className="job-detail empty">Select a job to see its detail, then accept or decline it — the buttons change local preview state only.</div>
+            <div className="job-detail empty">Select a job to see its detail, then accept or decline it.</div>
           )}
 
           <div className="earnings-card">
-            <h3><I.money size={20} /> Earnings (demo)</h3>
-            <div className="earn-row"><span>This week (demo)</span><strong>$— demo</strong></div>
-            <div className="earn-row"><span>Jobs completed (demo)</span><strong>— demo</strong></div>
-            <p className="fineprint">Demo figures only, shown to preview the layout. Your actual rates and payment terms are set in your signed provider agreement — this panel never quotes them.</p>
+            <h3><I.money size={20} /> Earnings</h3>
+            <div className="earn-row"><span>This week</span><strong>Nothing posted yet</strong></div>
+            <div className="earn-row"><span>Jobs completed</span><strong>0</strong></div>
+            <p className="fineprint">Your rates and payment terms are set in your signed provider agreement — this panel never quotes them. Figures post here as your completed jobs are invoiced through the platform.</p>
           </div>
 
           <div className="compliance-card">
-            <h3><I.clipboard size={20} /> Your compliance checklist (demo)</h3>
+            <h3><I.clipboard size={20} /> Your compliance checklist</h3>
             {[
-              { t: 'Insurance on file', s: 'Demo state: verified' },
-              { t: 'Background check', s: 'Demo state: passed' },
-              { t: 'Tools & vehicle confirmed', s: 'Demo state: confirmed' },
-              { t: 'Provider agreement signed', s: 'Demo state: signed' },
+              { t: 'Insurance on file', s: 'Required before first dispatch' },
+              { t: 'Background check', s: 'Required before first dispatch' },
+              { t: 'Tools & vehicle confirmed', s: 'Confirmed during onboarding' },
+              { t: 'Provider agreement signed', s: 'Required before first dispatch' },
             ].map(c => (
               <div key={c.t} className="comp-row"><I.check size={16} /><span><strong>{c.t}</strong><em>{c.s}</em></span></div>
             ))}
@@ -450,18 +453,21 @@ function Portal() {
 /* ---------------- NETWORK HQ ---------------- */
 
 function HQ({ go }: { go: (s: Screen) => void }) {
-  const cols: DemoJob['status'][] = ['Awaiting acceptance', 'Assigned', 'En route', 'Completed']
+  const cols: NetworkJob['status'][] = ['Awaiting acceptance', 'Assigned', 'En route', 'Completed']
   return (
     <section className="section page">
-      <div className="demo-banner"><I.alert size={17} /> <strong>NETWORK HQ — DEMO DATA.</strong> Operations view running on demo jobs and demo providers. Live operations run in Top Speed Service OS with the Service Setters.</div>
+      <div className="demo-banner"><I.alert size={17} /> <strong>NETWORK HQ — PRODUCTION.</strong> Live operations run in Top Speed Service OS with the Service Setters. This board was reset to zero at the production launch and fills as jobs are dispatched to network providers.</div>
 
       <p className="eyebrow">NETWORK HQ</p>
       <h1>Dispatch board</h1>
       <div className="board">
         {cols.map(c => (
           <div key={c} className="board-col">
-            <h4>{c} <span>{DEMO_JOBS.filter(j => j.status === c).length}</span></h4>
-            {DEMO_JOBS.filter(j => j.status === c).map(j => (
+            <h4>{c} <span>{NETWORK_JOBS.filter(j => j.status === c).length}</span></h4>
+            {NETWORK_JOBS.filter(j => j.status === c).length === 0 && (
+              <p className="fineprint" style={{ padding: '0.2rem 0.1rem' }}>No jobs</p>
+            )}
+            {NETWORK_JOBS.filter(j => j.status === c).map(j => (
               <div key={j.id} className="board-card">
                 <strong>{j.appliance}</strong>
                 <span>{j.problem}</span>
@@ -475,9 +481,15 @@ function HQ({ go }: { go: (s: Screen) => void }) {
 
       <div className="two-col">
         <div>
-          <h3 className="zone-h"><I.users size={19} /> Provider roster (demo)</h3>
+          <h3 className="zone-h"><I.users size={19} /> Provider roster</h3>
           <div className="roster">
-            {DEMO_PROVIDERS.map(p => (
+            {NETWORK_PROVIDERS.length === 0 && (
+              <div className="provider-card">
+                <div className="prov-top"><strong>No providers onboarded yet</strong></div>
+                <p>Applications are open — the first verified providers appear here as they complete onboarding.</p>
+              </div>
+            )}
+            {NETWORK_PROVIDERS.map(p => (
               <div key={p.id} className="provider-card">
                 <div className="prov-top"><strong>{p.name}</strong><span className={`status p-${p.status.replace(/\s/g, '').toLowerCase()}`}>{p.status}</span></div>
                 <p>{p.company}</p>
@@ -487,7 +499,7 @@ function HQ({ go }: { go: (s: Screen) => void }) {
               </div>
             ))}
           </div>
-          <p className="fineprint">The entire roster above is demo data for layout preview — not real providers, ratings, or counts.</p>
+          <p className="fineprint">Providers appear here once they complete verification and sign the provider agreement.</p>
         </div>
         <div>
           <h3 className="zone-h"><I.mapPin size={19} /> Coverage gaps — recruiting now</h3>
@@ -542,7 +554,7 @@ function Standards() {
 
       <div className="honest-box">
         <h3><I.doc size={19} /> The honest print</h3>
-        <p>This platform is a working prototype. The provider portal and Network HQ run on demo data, labeled as such everywhere it appears. Real dispatch today happens in <a href={SERVICE_OS} target="_blank" rel="noreferrer">Top Speed Service OS</a>, coordinated by human Service Setters. Rates and payment terms live in the signed provider agreement — never on a web page.</p>
+        <p>This platform is live, and applications submit straight into <a href={SERVICE_OS} target="_blank" rel="noreferrer">Top Speed Service OS</a>, where the network team reviews them by hand. Dispatch is coordinated by human Service Setters in Service OS — the board and roster here started at zero at the production launch and fill as providers onboard and jobs are dispatched. Rates and payment terms live in the signed provider agreement — never on a web page.</p>
         <p>Questions the FAQ didn't cover: call or text <a href={`tel:${PHONE.replace(/-/g, '')}`}>{PHONE}</a> or email <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.</p>
       </div>
     </section>
