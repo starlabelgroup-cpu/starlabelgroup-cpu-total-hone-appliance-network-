@@ -58,6 +58,11 @@ main { flex: 1; }
   font-weight: 700; font-size: 14px; border: 1.5px solid var(--blue); padding: 8px 13px; border-radius: 9px;
 }
 .header-call:hover { background: var(--blue); }
+.header-signin {
+  display: inline-flex; align-items: center; color: var(--ink, #12263a); text-decoration: none;
+  font-weight: 700; font-size: 14px; padding: 8px 6px; white-space: nowrap;
+}
+.header-signin:hover { text-decoration: underline; }
 
 /* ---------- shared ---------- */
 .section { max-width: 1160px; margin: 0 auto; padding: 52px 20px; width: 100%; }

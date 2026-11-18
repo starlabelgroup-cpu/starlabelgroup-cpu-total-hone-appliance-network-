@@ -57,6 +57,7 @@ export default function App() {
             <button key={n.id} className={screen === n.id ? 'on' : ''} onClick={() => go(n.id)}>{n.label}</button>
           ))}
         </nav>
+        <a className="header-signin" href={`${SERVICE_OS}/tech`} target="_blank" rel="noreferrer">Provider sign in</a>
         <a className="header-call" href={`tel:${PHONE.replace(/-/g, '')}`}><I.phone size={17} /> {PHONE}</a>
       </header>
 
@@ -91,6 +92,8 @@ export default function App() {
             <a href={`${SERVICE_OS}/book`} target="_blank" rel="noreferrer">Book a repair ↗</a>
             <a href={`${SERVICE_OS}/speedy`} target="_blank" rel="noreferrer">Talk to Speedy ↗</a>
             <a href={`${SERVICE_OS}/track`} target="_blank" rel="noreferrer">Track a job ↗</a>
+            <a href={`${SERVICE_OS}/tech`} target="_blank" rel="noreferrer">Provider sign in ↗</a>
+            <a href={`${SERVICE_OS}/reset-password`} target="_blank" rel="noreferrer">Forgot password ↗</a>
             <p className="foot-note">Customer looking for a repair? Book it, track it, or ask Speedy — the real AI assistant — in Top Speed Service OS. This network is the provider side.</p>
           </div>
           <div>
@@ -386,6 +389,10 @@ function Portal() {
 
       <p className="eyebrow">PROVIDER PORTAL</p>
       <h1>Your dispatched work</h1>
+      <p style={{ margin: '10px 0 0', fontSize: 14 }}>
+        Already onboarded? <a href={`${SERVICE_OS}/tech`} target="_blank" rel="noreferrer">Sign in to Speedy Pro (the Tech App)</a> with
+        your Service OS account — dispatched work is managed there. <a href={`${SERVICE_OS}/reset-password`} target="_blank" rel="noreferrer">Forgot password?</a>
+      </p>
 
       <div className="portal-grid">
         <div>
